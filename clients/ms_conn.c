@@ -2455,7 +2455,7 @@ static bool ms_update_event(ms_conn_t *c, const int new_flags)
 static bool ms_need_yield(ms_conn_t *c)
 {
   ms_thread_t *ms_thread= pthread_getspecific(ms_thread_key);
-  int64_t tps= 0;
+  double tps= 0;
   int64_t time_diff= 0;
   struct timeval curr_time;
   ms_task_t *task= &c->curr_task;
@@ -2464,9 +2464,7 @@ static bool ms_need_yield(ms_conn_t *c)
   {
     gettimeofday(&curr_time, NULL);
     time_diff= ms_time_diff(&ms_thread->startup_time, &curr_time);
-    tps=
-      (int64_t)((task->get_opt
-                 + task->set_opt) / ((uint64_t)time_diff / 1000000));
+    tps= (task->get_opt + task->set_opt) / time_diff / 1000000.0;
 
     /* current throughput is greater than expected throughput */
     if (tps > ms_thread->thread_ctx->tps_perconn)
