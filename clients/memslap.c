@@ -388,17 +388,17 @@ static int64_t ms_parse_size()
   {
   case 'k':
   case 'K':
-    ret*= 1024;
+    ret*= 1000;
     break;
 
   case 'm':
   case 'M':
-    ret*= 1024 * 1024;
+    ret*= 1000 * 1000;
     break;
 
   case 'g':
   case 'G':
-    ret*= 1024 * 1024 * 1024;
+    ret*= 1000 * 1000 * 1000;
     break;
 
   default:
