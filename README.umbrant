@@ -1,0 +1,3 @@
+Compiling this on Ubuntu 12.04 had some issues. I used this configure line:
+
+     -> % CXXFLAGS="-w" CFLAGS="-w" ./configure --with-debug
