@@ -2441,6 +2441,15 @@ static bool ms_update_event(ms_conn_t *c, const int new_flags)
   return true;
 } /* ms_update_event */
 
+static void slow_log(const char* string) {
+	static struct timeval log_time;
+	struct timeval curr_time;
+	gettimeofday(&curr_time, NULL);
+	if (ms_time_diff(&log_time, &curr_time) > 1000000) {
+		fprintf(stdout, "%s\n", string);
+		log_time = curr_time;
+	}
+}
 
 /**
  * If user want to get the expected throughput, we could limit
@@ -2457,14 +2466,35 @@ static bool ms_need_yield(ms_conn_t *c)
   ms_thread_t *ms_thread= pthread_getspecific(ms_thread_key);
   double tps= 0;
   int64_t time_diff= 0;
+  static struct timeval *last_time = NULL;
+  static int last_ops;
+  int ops;
   struct timeval curr_time;
   ms_task_t *task= &c->curr_task;
 
+  char* msg[1000];
+  memset(msg, '\0', 1000);
+
+  if (last_time == NULL) {
+  	  last_time = (struct timeval*)malloc(sizeof(struct timeval));
+  	  *last_time = ms_thread->startup_time;
+  }
+
+  gettimeofday(&curr_time, NULL);
+  if (ms_time_diff(last_time, &curr_time) > 1000000) {
+  	*last_time = curr_time;
+  	last_ops = task->get_opt + task->set_opt;
+  }
+
   if (ms_setting.expected_tps > 0)
   {
-    gettimeofday(&curr_time, NULL);
-    time_diff= ms_time_diff(&ms_thread->startup_time, &curr_time);
-    tps= (task->get_opt + task->set_opt) / time_diff / 1000000.0;
+    time_diff= ms_time_diff(last_time, &curr_time);
+    double duration = (double)time_diff / 1000000.0;
+    ops = (task->get_opt + task->set_opt) - last_ops;
+    tps = (double)ops / duration;
+
+    //sprintf(msg, "%d %f %f %d", ops, duration, tps, ms_thread->thread_ctx->tps_perconn);
+    //slow_log(msg);
 
     /* current throughput is greater than expected throughput */
     if (tps > ms_thread->thread_ctx->tps_perconn)

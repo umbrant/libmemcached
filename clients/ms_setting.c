@@ -860,6 +860,8 @@ static void ms_print_setting()
           ms_setting.cmd_distr[CMD_SET].cmd_prop);
   fprintf(stdout, "get proportion: get_prop=%.2f\n",
           ms_setting.cmd_distr[CMD_GET].cmd_prop);
+  fprintf(stdout, "max throughput: %d req/s\n",
+		  ms_setting.expected_tps);
   fflush(stdout);
 } /* ms_print_setting */
 
