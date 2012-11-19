@@ -2539,6 +2539,8 @@ static void ms_drive_machine(ms_conn_t *c)
   bool stop= false;
 
   assert(c != NULL);
+  unsigned int seed = 0xDEADBEEF;
+  srand(seed);
 
   while (! stop)
   {
@@ -2588,7 +2590,7 @@ static void ms_drive_machine(ms_conn_t *c)
     case conn_write:
       if (! c->ctnwrite && ms_need_yield(c))
       {
-        usleep(10);
+        usleep((rand() % 11)+5);
 
         if (! ms_update_event(c, EV_WRITE | EV_PERSIST))
         {
